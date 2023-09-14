@@ -1,0 +1,142 @@
+version: "3.8"
+
+services:
+
+# -------------------- JELLYFIN --------------------
+    jellyfin:
+        image: lscr.io/linuxserver/jellyfin:latest
+        container_name: jellyfin
+        environment:
+            - PUID=1026
+            - PGID=100
+            - TZ=Europe/Paris
+        volumes:
+            - /volume1/configs/jellyfin:/config
+            - /volume1/media/MOVIES:/movies
+            - /volume1/media/SHOWS:/tv
+        ports:
+            - 8096:8096
+        restart: unless-stopped
+
+# -------------------- JELLYSEERR --------------------
+    jellyseerr:
+        image: fallenbagel/jellyseerr:latest
+        container_name: jellyseerr
+        environment:
+            - LOG_LEVEL=debug
+            - TZ=Asia/Tashkent
+        ports:
+            - 5055:5055
+        volumes:
+            - /volume1/configs/jellyseerr:/app/config
+
+        restart: unless-stopped
+
+
+# TV SHOWS
+# -------------------- SONARR --------------------
+    sonarr:
+        image: linuxserver/sonarr:latest
+        container_name: sonarr
+        environment:
+            - PUID=1026
+            - PGID=100
+            - TZ=Europe/Paris
+        volumes:
+            - /volume1/configs/sonarr:/config
+
+            - type: bind
+              source: /volume1/media/DOWNLOADS
+              target: /downloads
+
+            - type: bind
+              source: /volume1/media/SHOWS
+              target: /tv
+
+        ports:
+            - 8989:8989
+        restart: unless-stopped
+
+# MOVIES
+# -------------------- RADARR --------------------
+    radarr:
+        image: linuxserver/radarr:latest
+        container_name: radarr
+        environment:
+            - PUID=1026
+            - PGID=100
+            - TZ=Europe/Paris
+        volumes:
+            - /volume1/configs/radarr:/config
+
+            - type: bind
+              source: /volume1/media/DOWNLOADS
+              target: /downloads
+
+            - type: bind 
+              source: /volume1/media/MOVIES
+              target: /movies
+
+        ports:
+            - 7878:7878
+        restart: unless-stopped
+
+# -------------------- QBITTORRENT --------------------
+    qbittorrent:
+        image: linuxserver/qbittorrent:latest
+        container_name: qbittorrent
+        environment:
+            - PUID=1026
+            - PGID=100
+            - TZ=Europe/Paris
+        volumes:
+            - /volume1/configs/qbittorrent:/config
+
+            - type: bind
+              source: /volume1/media/DOWNLOADS
+              target: /downloads
+
+            - type: bind
+              source: /volume1/media/DOWNLOADS
+              target: /torrents
+
+        ports:
+            - 8080:8080
+        restart: unless-stopped
+
+# -------------------- JACKETT --------------------
+    jackett:
+        image: linuxserver/jackett:latest
+        container_name: jackett
+        environment:
+            - PUID=1026
+            - PGID=100
+            - TZ=Europe/Paris
+            - AUTO_UPDATE=true
+        volumes:
+            - /volume1/configs/jackett:/config
+
+            - type: bind
+              source: /volume1/media/DOWNLOADS
+              target: /downloads
+
+        ports:
+            - 9117:9117
+        restart: unless-stopped
+
+# -------------------- BAZARR --------------------
+    bazarr:
+      image: lscr.io/linuxserver/bazarr:latest
+      container_name: bazarr
+      environment:
+        - PUID=1026
+        - PGID=100
+        - TZ=Europe/Paris
+      volumes:
+        - /volume1/configs/bazarr:/config
+        - /volume1/media/MOVIES:/movies
+        - /volume1/media/SHOWS:/tv
+      ports:
+        - 6767:6767
+      restart: unless-stopped
+
